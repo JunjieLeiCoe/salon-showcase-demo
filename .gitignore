@@ -1,0 +1,5 @@
+# private notes stay on this machine
+NOTES.local.md
+*.local.md
+
+.DS_Store

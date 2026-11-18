@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nail studio demo</title>
+<meta name="description" content="Test landing page for a nail salon showcase. Hand-painted gel nails, every set one of a kind.">
+<meta property="og:title" content="Nail studio demo">
+<meta property="og:description" content="Test landing page for a nail salon showcase.">
+<meta name="theme-color" content="#1f3029">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💅</text></svg>">
+<script>
+  // palette: ?palette=mocha in the address wins, then the one picked in the footer last time
+  (() => { let saved = ""; try { saved = localStorage.getItem("nails-palette") || ""; } catch (e) {}
+    const asked = new URLSearchParams(location.search).get("palette");
+    document.documentElement.dataset.palette = asked === null ? saved : asked; })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&display=swap" rel="stylesheet">
+<style>
+  /* A quiet, aged palette; the one loud thing is the wall of sets, lit like cat-eye polish under a magnet.
+     Default is ink green with aged ivory and antique brass. Add ?palette=mocha or ?palette=cherry to the address to compare. */
+  @property --p { syntax: "<percentage>"; inherits: true; initial-value: 42%; }
+  :root {
+    --page: #1f3029;         /* ink green */
+    --raised: #2a4035;       /* raised surfaces */
+    --line: #3f5849;
+    --ink: #efe5d0;          /* text: aged ivory */
+    --quiet: #b3b59c;        /* quiet text: oat */
+    --gleam: #f6e7bf;        /* the cat-eye light */
+    --price: #cda861;        /* prices: antique brass */
+    --grade: saturate(.7) sepia(.2) contrast(.96);   /* the faded-film look on every picture until it is hovered or opened */
+    --face: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    --pad: clamp(20px, 5vw, 72px);
+  }
+  html[data-palette="mocha"] { --page: #2d221c; --raised: #3c2e26; --line: #57453b; --ink: #efe3d2; --quiet: #b9a694; --gleam: #f5e3c8; --price: #c9a26b; }
+  html[data-palette="cherry"] { --page: #33091c; --raised: #451029; --line: #63203f; --ink: #fde8de; --quiet: #dea6b3; --gleam: #fff3d6; --price: #e7c27e; --grade: none; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  /* fine paper grain over the whole page */
+  body::before { content: ""; position: fixed; inset: 0; z-index: 8; pointer-events: none; opacity: .1; mix-blend-mode: soft-light;
+                 background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .7 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  html[data-palette="cherry"] body::before { display: none; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 400 17px/1.55 var(--face); font-variation-settings: "wdth" 100; -webkit-font-smoothing: antialiased; }
+  body.lang-en .zh, body.lang-zh .en { display: none; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--gleam); outline-offset: 3px; border-radius: 6px; }
+  h1, h2, p { margin: 0; }
+  button { font: inherit; color: inherit; }
+
+  /* --- top bar --- */
+  .top { position: absolute; z-index: 5; inset: 0 0 auto 0; display: flex; align-items: center; gap: 28px; padding: 22px var(--pad); }
+  .mark { font-weight: 800; font-size: 24px; font-variation-settings: "wdth" 78; letter-spacing: -.01em; text-decoration: none; margin-right: auto; }
+  .mark span { font-weight: 300; color: var(--quiet); margin-left: 6px; }
+  .top nav { display: flex; gap: 26px; font-size: 15.5px; }
+  .top nav a { text-decoration: none; color: var(--quiet); }
+  .top nav a:hover { color: var(--ink); }
+  .lang { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 13px; font-size: 14px; color: var(--quiet); cursor: pointer; }
+  .lang:hover { color: var(--ink); border-color: var(--quiet); }
+  .btn { display: inline-block; background: var(--ink); color: var(--page); font-weight: 650; text-decoration: none; border: 0; border-radius: 999px; padding: 13px 24px; cursor: pointer; }
+  .btn:hover { background: #fff; }
+  .btn.small { padding: 9px 18px; font-size: 15px; }
+  .plain { color: var(--ink); text-underline-offset: 5px; text-decoration-thickness: 1px; }
+
+  /* --- hero --- */
+  .hero { position: relative; min-height: min(100svh, 940px); display: grid; align-items: center; padding: 120px var(--pad) 64px; overflow: hidden; }
+  .say { position: relative; z-index: 2; max-width: 620px; }
+  h1 { font-weight: 800; font-size: clamp(52px, 7.6vw, 112px); line-height: .9; letter-spacing: -.025em; font-variation-settings: "wdth" 76; }
+  body.lang-zh h1 { font-weight: 600; font-size: clamp(46px, 6.4vw, 92px); line-height: 1.08; letter-spacing: 0; }
+  .say > p { margin-top: 26px; max-width: 30em; font-size: 19px; color: var(--quiet); }
+  .say > p b { color: var(--ink); font-weight: 500; }
+  .go { display: flex; align-items: center; gap: 24px; margin-top: 30px; flex-wrap: wrap; }
+  .proof { display: flex; gap: clamp(22px, 4vw, 52px); margin-top: clamp(40px, 7vh, 76px); }
+  .proof b { display: block; font-size: 34px; font-weight: 700; line-height: 1.05; font-variation-settings: "wdth" 82; font-variant-numeric: tabular-nums; }
+  .proof span { font-size: 14.5px; color: var(--quiet); }
+
+  /* the wall: a tilted plane of sets drifting in columns */
+  /* It fills the whole hero. The sets lean to the right and sit nearly upright, so the pictures stay readable. */
+  .wall { position: absolute; z-index: 0; inset: 0; perspective: 1900px; overflow: hidden;
+          -webkit-mask-image: linear-gradient(180deg, transparent 4%, #000 24%, #000 82%, transparent 100%); mask-image: linear-gradient(180deg, transparent 4%, #000 24%, #000 82%, transparent 100%); }
+  .plane { position: absolute; left: 57%; top: 50%; width: 1900px; display: flex; gap: 22px; transform: translate(-50%, -50%) rotateX(16deg) rotateY(-15deg) rotateZ(4deg) skewX(-5deg); transform-style: preserve-3d; }
+  /* a veil of the page colour over the left side: the sets carry on behind the words, dimmed, and the text stays easy to read */
+  .hero::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+                 background: linear-gradient(90deg, color-mix(in srgb, var(--page) 92%, transparent) 0%, color-mix(in srgb, var(--page) 87%, transparent) 40%, color-mix(in srgb, var(--page) 36%, transparent) 56%, transparent 70%); }
+  .col { flex: 1; animation: drift 80s linear infinite; }
+  .col:nth-child(even) { animation-direction: reverse; animation-duration: 96s; }
+  .plane:hover .col { animation-play-state: paused; }
+  @keyframes drift { to { transform: translateY(-33.3333%); } }
+  .tile { display: block; width: 100%; aspect-ratio: 4 / 5; margin: 0 0 20px; border-radius: 18px; overflow: hidden; cursor: pointer; box-shadow: 0 22px 44px rgba(0, 0, 0, .42); filter: var(--grade); transition: transform .25s ease, filter .25s ease; }
+  .tile:hover { transform: translateZ(46px) scale(1.03); filter: brightness(1.06); }   /* true colour comes back on hover */
+  .tile svg, .tile img, .look svg, .look img, .big svg, .big img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* the cat-eye band: a stripe of light across the whole wall that follows the pointer */
+  .plane::after { content: ""; position: absolute; inset: -12%; pointer-events: none; transform: translateZ(2px); mix-blend-mode: soft-light;
+                  background: linear-gradient(98deg, transparent calc(var(--p) - 11%), rgba(255, 243, 214, .95) var(--p), transparent calc(var(--p) + 11%)); }
+  @media (hover: none) { .plane { animation: sweep 9s ease-in-out infinite alternate; } }
+  @keyframes sweep { from { --p: 8%; } to { --p: 92%; } }
+
+  /* --- sections --- */
+  .band { padding: clamp(64px, 9vw, 120px) var(--pad); max-width: 1320px; margin: 0 auto; }
+  h2 { font-weight: 750; font-size: clamp(34px, 4.4vw, 56px); line-height: 1; letter-spacing: -.02em; font-variation-settings: "wdth" 80; }
+  body.lang-zh h2 { font-weight: 600; letter-spacing: 0; }
+  .lede { margin-top: 12px; color: var(--quiet); max-width: 34em; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 22px; }
+  .chips button { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 15px; color: var(--quiet); cursor: pointer; }
+  .chips button:hover { color: var(--ink); border-color: var(--quiet); }
+  .chips button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--page); font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px 16px; }
+  .look { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+  .look .art { aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; filter: var(--grade); transition: transform .2s ease, filter .2s ease; }
+  .look:hover .art, .look:focus-visible .art { transform: translateY(-4px); filter: none; }
+  .look b { display: block; margin-top: 10px; font-weight: 600; font-size: 16px; }
+  .look small { color: var(--quiet); font-size: 14px; }
+
+  .two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 6vw, 96px); align-items: start; }
+  .menu { margin: 0; }
+  .menu div { display: flex; align-items: baseline; gap: 12px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .menu div:first-child { border-top: 1px solid var(--line); }
+  .menu dt { font-size: 21px; font-weight: 600; }
+  .menu dt small { display: block; font-size: 15px; font-weight: 400; color: var(--quiet); margin-top: 2px; }
+  .menu i { flex: 1; border-bottom: 2px dotted var(--line); transform: translateY(-5px); min-width: 24px; }
+  .menu dd { margin: 0; font-size: 21px; font-weight: 600; color: var(--price); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .menu dd small { font-size: 14px; font-weight: 400; color: var(--quiet); margin-right: 6px; }
+
+  .steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 44px 1fr; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .steps li:first-child { border-top: 1px solid var(--line); }
+  .steps li::before { content: counter(s); width: 36px; height: 36px; border-radius: 50%; border: 1.5px solid var(--quiet); display: grid; place-items: center; font-weight: 700; font-size: 16px; }
+  .steps b { display: block; font-size: 19px; font-weight: 600; }
+  .steps span span, .steps li > span > span { color: var(--quiet); }
+  .picked { margin-top: 22px; background: var(--raised); border: 1px solid var(--line); border-radius: 14px; padding: 12px 16px; font-size: 15.5px; display: none; }
+  .picked.on { display: block; }
+  .picked b { font-weight: 600; }
+  .bookrow { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 26px; }
+  .bookrow p { color: var(--quiet); font-size: 15.5px; }
+
+  footer { padding: 34px var(--pad) calc(110px + env(safe-area-inset-bottom)); color: var(--quiet); font-size: 14.5px; display: flex; gap: 14px 30px; flex-wrap: wrap; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); }
+  .swatches { display: flex; align-items: center; gap: 10px; }
+  .swatches button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line); padding: 0; cursor: pointer; }
+  .swatches button[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink); }
+
+  /* --- one set, opened --- */
+  dialog { width: min(880px, calc(100vw - 28px)); padding: 0; border: 1px solid var(--line); border-radius: 22px; background: var(--raised); color: var(--ink); overflow: hidden; }
+  dialog::backdrop { background: rgba(8, 10, 9, .74); backdrop-filter: blur(3px); }
+  .sheet { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .big { aspect-ratio: 4 / 5; }
+  .info { padding: 34px 30px 30px; display: flex; flex-direction: column; }
+  .info h3 { margin: 0; font-size: 34px; line-height: 1.05; font-weight: 750; letter-spacing: -.015em; font-variation-settings: "wdth" 80; }
+  .info .kind { color: var(--quiet); margin-top: 8px; }
+  .facts { margin: 26px 0 0; }
+  .facts div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 16px; }
+  .facts dt { color: var(--quiet); } .facts dd { margin: 0; font-weight: 600; text-align: right; }
+  .info .btn { margin-top: auto; text-align: center; }
+  .shut { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; border: 0; background: color-mix(in srgb, var(--page) 72%, transparent); color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
+  .shut:hover { background: var(--page); }
+
+  .bookbar { display: none; }
+
+  /* ---------- phone: this is how most visitors will see it ---------- */
+  @media (max-width: 860px) {
+    body { font-size: 16.5px; }
+    .top { padding: calc(14px + env(safe-area-inset-top)) var(--pad) 14px; }
+    .top nav, .top .btn { display: none; }
+    .lang { padding: 10px 16px; font-size: 15px; }
+
+    /* the wall fills the first screen; a veil from the top keeps the words readable and leaves the lower part bright */
+    .hero { display: flex; flex-direction: column; min-height: min(100svh, 880px); padding: calc(88px + env(safe-area-inset-top)) var(--pad) 40px; }
+    .hero::after { background: linear-gradient(180deg, color-mix(in srgb, var(--page) 95%, transparent) 0%, color-mix(in srgb, var(--page) 90%, transparent) 50%, color-mix(in srgb, var(--page) 40%, transparent) 64%, transparent 76%); }
+    .wall { -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 12%, #000 88%, transparent 100%); }
+    .plane { left: 50%; top: 62%; width: 800px; gap: 12px; transform: translate(-50%, -50%) rotateX(12deg) rotateY(-10deg) rotateZ(4deg) skewX(-5deg); }
+    .tile { margin-bottom: 12px; border-radius: 14px; box-shadow: 0 10px 22px rgba(0, 0, 0, .4); filter: none; }
+    .col { filter: var(--grade); }    /* one filter per column, not one per picture: lighter work for a phone */
+    .tile:active { transform: scale(.97); }
+    h1 { font-size: clamp(46px, 14.2vw, 68px); }
+    body.lang-zh h1 { font-size: clamp(40px, 12vw, 58px); }
+    .say > p { margin-top: 18px; font-size: 17.5px; }
+    .go { margin-top: 22px; gap: 20px; } .go .btn { padding: 15px 28px; font-size: 17px; }
+    .proof { margin-top: 26px; gap: 22px; } .proof b { font-size: 26px; } .proof span { font-size: 13.5px; display: block; }
+
+    .band { padding: 56px var(--pad); }
+    .two { grid-template-columns: 1fr; gap: 22px; }
+    /* filters on one line that scrolls sideways, so the pictures start sooner */
+    .chips { flex-wrap: nowrap; overflow-x: auto; margin: 22px calc(var(--pad) * -1) 18px; padding: 2px var(--pad); scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chips button { flex: none; padding: 10px 17px; }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; }
+    .look:active .art { transform: scale(.97); }
+    .look b { font-size: 15.5px; margin-top: 8px; } .look small { font-size: 13.5px; }
+    .menu dt { font-size: 18.5px; } .menu dd { font-size: 19px; } .menu dt small { font-size: 14.5px; }
+    .steps b { font-size: 18px; }
+    .bookrow .btn { width: 100%; text-align: center; padding: 16px; font-size: 17px; }
+
+    /* a set opens as a sheet from the bottom, where the thumb is */
+    dialog { width: 100vw; max-width: 100vw; margin: auto 0 0; border-width: 1px 0 0; border-radius: 22px 22px 0 0; max-height: 92svh; overflow-y: auto; }
+    .sheet { grid-template-columns: 1fr; } .big { aspect-ratio: 4 / 3; }
+    .info { padding: 20px var(--pad) calc(22px + env(safe-area-inset-bottom)); } .info h3 { font-size: 27px; } .facts { margin-top: 16px; }
+    .info .btn { margin-top: 20px; padding: 16px; font-size: 17px; }
+    .shut { width: 44px; height: 44px; font-size: 22px; }
+
+    /* the bar appears once the hero's own button has scrolled away, and steps aside at the booking section */
+    .bookbar { display: block; position: fixed; z-index: 9; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); padding: 16px; font-size: 17px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); transform: translateY(160%); transition: transform .25s ease; }
+    body.scrolled .bookbar { transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .col, .plane { animation: none !important; }
+    .tile, .look .art { transition: none; }
+  }
+</style>
+</head>
+<body class="lang-en">
+
+<header class="top">
+  <a class="mark" href="#top">Nail<span>studio</span></a>
+  <nav>
+    <a href="#looks"><span class="en">Looks</span><span class="zh">款式</span></a>
+    <a href="#prices"><span class="en">Prices</span><span class="zh">价格</span></a>
+    <a href="#book"><span class="en">How to book</span><span class="zh">怎么预约</span></a>
+  </nav>
+  <button class="lang" id="lang" type="button">中文</button>
+  <a class="btn small" href="#book"><span class="en">Book a set</span><span class="zh">预约</span></a>
+</header>
+
+<main id="top">
+  <section class="hero" id="hero">
+    <div class="say">
+      <h1><span class="en">Every set,<br>one of a kind.</span><span class="zh">每一副，<br>都是独一份。</span></h1>
+      <p><span class="en">Hand-painted gel nails, one client at a time. <b>Bring a screenshot, a color, or just a mood.</b> You leave with a set nobody else is wearing.</span><span class="zh">一位一位认真画的手绘凝胶美甲。<b>带一张截图、一个颜色，或者只是一种感觉来。</b>带走一副别人没有的美甲。</span></p>
+      <div class="go">
+        <a class="btn" href="#book"><span class="en">Book a set</span><span class="zh">预约</span></a>
+        <a class="plain" href="#looks"><span class="en">See all looks</span><span class="zh">看全部款式</span></a>
+      </div>
+      <div class="proof">
+        <div><b>2,900+</b><span class="en">sets painted</span><span class="zh">副美甲</span></div>
+        <div><b>875</b><span class="en">clients</span><span class="zh">位客人</span></div>
+        <div><b>62</b><span class="en">regulars with 10+ visits</span><span class="zh">位来过 10 次以上的熟客</span></div>
+      </div>
+    </div>
+    <div class="wall" aria-hidden="true"><div class="plane" id="plane"></div></div>
+  </section>
+
+  <section class="band" id="looks">
+    <h2><span class="en">Looks</span><span class="zh">款式</span></h2>
+    <p class="lede"><span class="en">Tap a set to see what it is, how long it takes and where the price starts. These are drawn stand-ins until the real photos go in.</span><span class="zh">点一副看看是什么款、要多久、起步价多少。现在是手绘示意图，之后换成真实照片。</span></p>
+    <div class="chips" id="chips" role="group" aria-label="Filter looks by style"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="band two" id="prices">
+    <div>
+      <h2><span class="en">Prices</span><span class="zh">价格</span></h2>
+      <p class="lede"><span class="en">Prices start here and go up with the design. You get the exact number before any polish goes on.</span><span class="zh">这是起步价，款式越复杂越高。动手之前会先告诉你确切的价格。</span></p>
+    </div>
+    <dl class="menu" id="menu"></dl>
+  </section>
+
+  <section class="band two" id="book">
+    <div>
+      <h2><span class="en">How to book</span><span class="zh">怎么预约</span></h2>
+      <p class="lede"><span class="en">Three steps, about two minutes.</span><span class="zh">三步，大概两分钟。</span></p>
+    </div>
+    <div>
+      <ol class="steps">
+        <li><span><b><span class="en">Pick a look, or send a photo</span><span class="zh">选一个款式，或者发一张照片</span></b><span><span class="en">Anything works: a set from this page, a screenshot, a dress you are matching.</span><span class="zh">都可以：这页上的款式、一张截图、要搭配的裙子。</span></span></span></li>
+        <li><span><b><span class="en">Choose a time</span><span class="zh">选一个时间</span></b><span><span class="en">Most sets take 1.5 to 2.5 hours.</span><span class="zh">大多数款式需要 1.5 到 2.5 小时。</span></span></span></li>
+        <li><span><b><span class="en">Hold it with a $30 deposit</span><span class="zh">付 $30 订金确认</span></b><span><span class="en">The deposit comes off your total on the day.</span><span class="zh">订金会在当天从总价里扣掉。</span></span></span></li>
+      </ol>
+      <p class="picked" id="picked" role="status"></p>
+      <div class="bookrow">
+        <a class="btn" id="booklink" href="#book"><span class="en">Book online</span><span class="zh">在线预约</span></a>
+        <p id="igline" hidden><span class="en">or message </span><span class="zh">或者在 Instagram 私信 </span><a class="plain" id="iglink" href="#book"></a><span class="en"> on Instagram</span></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span><span class="en">Test page for a nail salon showcase. The name, numbers, prices and pictures are placeholders.</span><span class="zh">美甲店展示页的测试版。名字、数字、价格和图片都是占位内容。</span></span>
+  <span class="swatches" id="swatches"><span class="en">Colour</span><span class="zh">配色</span>
+    <button type="button" data-pal="" style="background:#1f3029" aria-label="Ink green"></button>
+    <button type="button" data-pal="mocha" style="background:#2d221c" aria-label="Mocha"></button>
+    <button type="button" data-pal="cherry" style="background:#33091c" aria-label="Cherry"></button>
+  </span>
+</footer>
+
+<dialog id="sheet" aria-labelledby="sheet-name">
+  <button class="shut" id="shut" type="button" aria-label="Close">×</button>
+  <div class="sheet">
+    <div class="big" id="sheet-art"></div>
+    <div class="info">
+      <h3 id="sheet-name"></h3>
+      <p class="kind" id="sheet-kind"></p>
+      <dl class="facts" id="sheet-facts"></dl>
+      <a class="btn" id="sheet-book" href="#book"><span class="en">Book this look</span><span class="zh">预约这一款</span></a>
+    </div>
+  </div>
+</dialog>
+
+<a class="btn bookbar" href="#book"><span class="en">Book a set</span><span class="zh">预约</span></a>
+
+<script>
+/* ============================================================
+   CONTENT. Edit here; nothing below this block needs to change.
+   ============================================================ */
+const SITE = {
+  bookUrl: "",      // the online booking link; while empty, the Book button says this is a demo
+  instagram: "",    // handle without the @; while empty, the Instagram line stays hidden
+};
+
+// What a set is, how long it takes, where the price starts. Shown in the price list and on each look.
+const SERVICES = {
+  gel:  { en: "Structured gel manicure", zh: "建构凝胶美甲", noteEn: "simple or custom design, on your natural nails", noteZh: "简单款或定制款，做在本甲上", from: 55, timeEn: "1.5 to 2 hours", timeZh: "1.5 到 2 小时" },
+  fill: { en: "Gel-X fill", zh: "Gel-X 补甲", noteEn: "refresh a set after 3 to 4 weeks", noteZh: "3 到 4 周后补甲", from: 65, timeEn: "about 2 hours", timeZh: "约 2 小时" },
+  ext:  { en: "Gel-X extensions", zh: "Gel-X 延长甲", noteEn: "new length and shape, with design", noteZh: "新的长度和甲型，含款式", from: 80, timeEn: "2 to 2.5 hours", timeZh: "2 到 2.5 小时" },
+};
+
+const STYLES = {
+  french:  { en: "French", zh: "法式" },
+  chrome:  { en: "Chrome", zh: "镜面" },
+  cateye:  { en: "Cat eye", zh: "猫眼" },
+  painted: { en: "Hand-painted", zh: "手绘" },
+  sparkle: { en: "Sparkle", zh: "闪片" },
+};
+
+// One entry per set. Add `photo: "photos/cherry-french.jpg"` to show a real photo instead of the drawing.
+const LOOKS = [
+  { en: "Cherry French", zh: "樱桃法式", style: "french", service: "gel", shape: "almond", art: { bg: "#f3d9d2", skin: "#e8b9a0", type: "french", base: "#f6d5c9", tip: "#8f1027" } },
+  { en: "Glazed milk", zh: "奶油镜面", style: "chrome", service: "gel", shape: "oval", art: { bg: "#dcd8ea", skin: "#c99a7c", type: "chrome", base: "#f4eef2", sheen: "#cfc6f5", base2: "#fbe3ea" } },
+  { en: "Emerald cat eye", zh: "祖母绿猫眼", style: "cateye", service: "gel", shape: "almond", art: { bg: "#17352e", skin: "#b98463", type: "cateye", base: "#0e3b30", tip: "#a8f0cf" } },
+  { en: "Blush aura", zh: "腮红晕染", style: "painted", service: "gel", shape: "oval", art: { bg: "#f6e3da", skin: "#eec4ac", type: "aura", base: "#fbe9df", tip: "#f0668a" } },
+  { en: "Tortoiseshell", zh: "玳瑁", style: "painted", service: "ext", shape: "coffin", art: { bg: "#e9c98f", skin: "#8d5a3d", type: "tortoise", base: "#d98a1e", tip: "#3a1a08" } },
+  { en: "Tiny hearts", zh: "小爱心", style: "painted", service: "gel", shape: "almond", art: { bg: "#ffd5dc", skin: "#e8b9a0", type: "hearts", base: "#ffe9ec", tip: "#d81e3f" } },
+  { en: "Blue porcelain", zh: "青花瓷", style: "painted", service: "ext", shape: "square", art: { bg: "#c9d8ee", skin: "#eec4ac", type: "porcelain", base: "#fbfbf7", tip: "#1d47b0" } },
+  { en: "Gold leaf noir", zh: "黑金箔", style: "sparkle", service: "ext", shape: "stiletto", art: { bg: "#2b2620", skin: "#b98463", type: "foil", base: "#15130f", tip: "#e9c46a" } },
+  { en: "Lavender fade", zh: "薰衣草渐变", style: "painted", service: "gel", shape: "oval", art: { bg: "#e4d7f5", skin: "#c99a7c", type: "ombre", base: "#fbeef2", tip: "#8b5fd6" } },
+  { en: "Mocha check", zh: "摩卡格纹", style: "painted", service: "gel", shape: "square", art: { bg: "#d8c1ae", skin: "#8d5a3d", type: "checker", base: "#f4e6d6", tip: "#6b3f2a" } },
+  { en: "Midnight stars", zh: "午夜星空", style: "sparkle", service: "ext", shape: "almond", art: { bg: "#101a3d", skin: "#eec4ac", type: "stars", base: "#16245c", tip: "#ffe9a8" } },
+  { en: "Peach jelly", zh: "蜜桃果冻", style: "painted", service: "ext", shape: "coffin", art: { bg: "#ffd9bf", skin: "#e8b9a0", type: "jelly", base: "#ff8f5e", tip: "#ffe2cf" } },
+  { en: "Daisy field", zh: "小雏菊", style: "painted", service: "gel", shape: "oval", art: { bg: "#d5ead0", skin: "#eec4ac", type: "daisy", base: "#cfe8c6", tip: "#ffffff" } },
+  { en: "Wine cat eye", zh: "酒红猫眼", style: "cateye", service: "fill", shape: "almond", art: { bg: "#3c0f24", skin: "#c99a7c", type: "cateye", base: "#4a0d24", tip: "#ffb3c7" } },
+  { en: "Silver tips", zh: "银色法式", style: "french", service: "ext", shape: "coffin", art: { bg: "#d6d9de", skin: "#8d5a3d", type: "french", base: "#f1d8cf", tip: "#b9c2cf", chrome: true } },
+  { en: "Matcha swirl", zh: "抹茶漩涡", style: "painted", service: "gel", shape: "almond", art: { bg: "#e7edcf", skin: "#b98463", type: "swirl", base: "#f5f1de", tip: "#6f9a3c", tip2: "#c7d98a" } },
+  { en: "Marble stone", zh: "大理石", style: "painted", service: "fill", shape: "square", art: { bg: "#dedad6", skin: "#eec4ac", type: "marble", base: "#f7f5f2", tip: "#56504c" } },
+  { en: "Champagne glitter", zh: "香槟闪片", style: "sparkle", service: "gel", shape: "oval", art: { bg: "#f1e2c4", skin: "#e8b9a0", type: "glitter", base: "#f6dcc9", tip: "#d9a441" } },
+  { en: "Sapphire cat eye", zh: "蓝宝石猫眼", style: "cateye", service: "ext", shape: "stiletto", art: { bg: "#0e1d45", skin: "#eec4ac", type: "cateye", base: "#0c1f5c", tip: "#a9c8ff" } },
+  { en: "Rose chrome", zh: "玫瑰镜面", style: "chrome", service: "fill", shape: "coffin", art: { bg: "#f0c7cf", skin: "#b98463", type: "chrome", base: "#f3a9b9", sheen: "#ffe6ee", base2: "#d9778f" } },
+];
+
+/* ============================================================
+   Stand-in artwork: five painted nails on fingertips, drawn as SVG.
+   ============================================================ */
+const mulberry = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const FAN = [ { x: 54, y: 384, w: 60, L: 138, r: -17 }, { x: 127, y: 336, w: 67, L: 162, r: -8 }, { x: 200, y: 320, w: 70, L: 174, r: 0 }, { x: 273, y: 336, w: 67, L: 162, r: 8 }, { x: 346, y: 384, w: 58, L: 132, r: 17 } ];
+let serial = 0;
+
+function nailShape(shape, w, L) {
+  const base = `C${w} ${L * .96} ${w * .76} ${L} ${w / 2} ${L}C${w * .24} ${L} 0 ${L * .96} 0 ${L * .8}Z`;
+  if (shape === "square") return `M0 ${L * .8}V8Q0 0 8 0H${w - 8}Q${w} 0 ${w} 8V${L * .8}` + base;
+  if (shape === "coffin") return `M0 ${L * .8}L${w * .19} 7Q${w * .21} 0 ${w * .3} 0H${w * .7}Q${w * .79} 0 ${w * .81} 7L${w} ${L * .8}` + base;
+  if (shape === "stiletto") return `M0 ${L * .8}C${w * .04} ${L * .42} ${w * .3} ${L * .1} ${w / 2} 0C${w * .7} ${L * .1} ${w * .96} ${L * .42} ${w} ${L * .8}` + base;
+  if (shape === "oval") return `M0 ${L * .8}V${L * .36}C0 ${L * .1} ${w * .2} 0 ${w / 2} 0C${w * .8} 0 ${w} ${L * .1} ${w} ${L * .36}V${L * .8}` + base;
+  return `M0 ${L * .8}C0 ${L * .42} ${w * .14} ${L * .14} ${w / 2} 0C${w * .86} ${L * .14} ${w} ${L * .42} ${w} ${L * .8}` + base;   // almond
+}
+
+function paint(a, w, L, id, rnd) {
+  const base = `<rect width="${w}" height="${L}" fill="${a.base}"/>`, at = (lo, hi) => lo + rnd() * (hi - lo);
+  switch (a.type) {
+    case "french": {
+      const tip = a.chrome ? `url(#${id}g)` : a.tip;
+      const defs = a.chrome ? `<linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="${a.tip}"/><stop offset=".7" stop-color="#fff"/><stop offset="1" stop-color="${a.tip}"/></linearGradient>` : "";
+      return defs + base + `<path d="M-3 -3H${w + 3}V${L * .31}Q${w / 2} ${L * .13} -3 ${L * .31}Z" fill="${tip}"/>`;
+    }
+    case "ombre":
+      return `<linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a.tip}"/><stop offset=".78" stop-color="${a.base}"/></linearGradient><rect width="${w}" height="${L}" fill="url(#${id}g)"/>`;
+    case "cateye":
+      return `<linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a.tip}" stop-opacity="0"/><stop offset=".5" stop-color="${a.tip}" stop-opacity=".95"/><stop offset="1" stop-color="${a.tip}" stop-opacity="0"/></linearGradient>` + base +
+        `<g transform="rotate(${at(-34, -22)} ${w / 2} ${L / 2})"><rect x="${-w}" y="${L * at(.3, .42)}" width="${w * 3}" height="${L * .24}" fill="url(#${id}g)"/><rect x="${-w}" y="${L * at(.6, .68)}" width="${w * 3}" height="${L * .07}" fill="url(#${id}g)" opacity=".45"/></g>`;
+    case "chrome":
+      return `<linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${a.base}"/><stop offset=".3" stop-color="${a.sheen}"/><stop offset=".52" stop-color="#fff"/><stop offset=".72" stop-color="${a.base2}"/><stop offset="1" stop-color="${a.sheen}"/></linearGradient><rect width="${w}" height="${L}" fill="url(#${id}g)"/>`;
+    case "aura":
+      return `<radialGradient id="${id}g" cx=".5" cy=".52" r=".5"><stop offset="0" stop-color="${a.tip}"/><stop offset=".85" stop-color="${a.base}"/></radialGradient>` + base + `<ellipse cx="${w / 2}" cy="${L * .5}" rx="${w * .5}" ry="${L * .34}" fill="url(#${id}g)"/>`;
+    case "jelly":
+      return `<radialGradient id="${id}g" cx=".5" cy=".35" r=".7"><stop offset="0" stop-color="${a.tip}"/><stop offset="1" stop-color="${a.base}"/></radialGradient><rect width="${w}" height="${L}" fill="url(#${id}g)" opacity=".92"/>`;
+    case "glitter": {
+      let dots = ""; for (let i = 0; i < 26; i++) dots += `<circle cx="${at(4, w - 4)}" cy="${at(4, L * .86) * (.35 + rnd() * .65)}" r="${at(.9, 2.6)}" fill="${rnd() > .4 ? a.tip : "#fff"}" opacity="${at(.55, 1)}"/>`;
+      return base + dots;
+    }
+    case "foil": {
+      let bits = ""; for (let i = 0; i < 7; i++) { const cx = at(8, w - 8), cy = at(10, L * .85), s = at(3, 7); bits += `<path d="M${cx - s} ${cy - s * .4}L${cx + s * .2} ${cy - s}L${cx + s} ${cy + s * .1}L${cx - s * .1} ${cy + s * .8}Z" fill="${a.tip}" opacity="${at(.7, 1)}"/>`; }
+      return base + bits;
+    }
+    case "hearts": {
+      let h = ""; for (let i = 0; i < 3; i++) h += `<path transform="translate(${at(12, w - 12)} ${L * (.2 + i * .24) + at(-6, 6)}) scale(${at(.9, 1.5)}) rotate(${at(-25, 25)})" d="M0 -2.4C-2.6 -6.6 -8 -2.6 0 4.4C8 -2.6 2.6 -6.6 0 -2.4Z" fill="${a.tip}"/>`;
+      return base + h;
+    }
+    case "stars": {
+      let st = ""; for (let i = 0; i < 4; i++) st += `<path transform="translate(${at(10, w - 10)} ${at(14, L * .84)}) scale(${at(.7, 1.6)})" d="M0 -5L1.2 -1.2L5 0L1.2 1.2L0 5L-1.2 1.2L-5 0L-1.2 -1.2Z" fill="${a.tip}"/>`;
+      for (let i = 0; i < 12; i++) st += `<circle cx="${at(4, w - 4)}" cy="${at(6, L * .9)}" r="${at(.5, 1.2)}" fill="#fff" opacity="${at(.4, .9)}"/>`;
+      return base + st;
+    }
+    case "daisy": {
+      let fl = ""; for (let i = 0; i < 2; i++) { const cx = at(14, w - 14), cy = L * (.26 + i * .34) + at(-6, 6); for (let p = 0; p < 6; p++) fl += `<circle cx="${cx + Math.cos(p * 1.047) * 6}" cy="${cy + Math.sin(p * 1.047) * 6}" r="3.8" fill="${a.tip}"/>`; fl += `<circle cx="${cx}" cy="${cy}" r="3" fill="#f2b632"/>`; }
+      return base + fl;
+    }
+    case "tortoise": {
+      let bl = ""; for (let i = 0; i < 6; i++) bl += `<ellipse cx="${at(4, w - 4)}" cy="${at(8, L * .9)}" rx="${at(6, 13)}" ry="${at(5, 10)}" transform="rotate(${at(0, 90)} ${w / 2} ${L / 2})" fill="${a.tip}" opacity="${at(.55, .85)}"/>`;
+      return base + bl + `<rect width="${w}" height="${L}" fill="#f6b53c" opacity=".14"/>`;
+    }
+    case "marble": {
+      let v = ""; for (let i = 0; i < 3; i++) { const y0 = at(10, L * .8); v += `<path d="M-4 ${y0}C${w * .3} ${y0 + at(-22, 22)} ${w * .6} ${y0 + at(-26, 26)} ${w + 4} ${y0 + at(-30, 30)}" stroke="${a.tip}" stroke-width="${at(.7, 1.9)}" opacity="${at(.35, .75)}" fill="none"/>`; }
+      return base + v;
+    }
+    case "checker": {
+      let sq = ""; const s = w / 4; for (let r = 0; r * s < L; r++) for (let c = 0; c < 4; c++) if ((r + c) % 2) sq += `<rect x="${c * s}" y="${r * s}" width="${s}" height="${s}" fill="${a.tip}"/>`;
+      return base + sq;
+    }
+    case "swirl": {
+      let sw = ""; for (let i = 0; i < 3; i++) { const y0 = L * (.18 + i * .27); sw += `<path d="M-6 ${y0 + at(-8, 8)}C${w * .25} ${y0 - 22} ${w * .75} ${y0 + 24} ${w + 6} ${y0 + at(-8, 8)}" stroke="${i % 2 ? a.tip2 : a.tip}" stroke-width="${at(5, 8)}" stroke-linecap="round" fill="none"/>`; }
+      return base + sw;
+    }
+    case "porcelain": {
+      const y0 = L * at(.5, .7); let pc = `<path d="M${w * .2} ${L * .86}C${w * .3} ${y0} ${w * .6} ${y0 - 10} ${w * .78} ${L * .16}" stroke="${a.tip}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+      for (let i = 0; i < 4; i++) { const t = .2 + i * .2; pc += `<ellipse cx="${w * (.28 + t * .5) + at(-5, 5)}" cy="${L * (.82 - t * .7)}" rx="5.4" ry="2.8" transform="rotate(${at(-60, 60)} ${w * (.28 + t * .5)} ${L * (.82 - t * .7)})" fill="${a.tip}"/>`; }
+      return base + pc;
+    }
+    default: return base;
+  }
+}
+
+function drawSet(look, seed) {
+  const a = look.art, id = "n" + (serial++), rnd = mulberry(seed * 977 + 13);
+  let nails = "";
+  FAN.forEach((n, i) => {
+    const shape = nailShape(look.shape, n.w, n.L), cid = `${id}c${i}`;
+    nails += `<g transform="translate(${n.x - n.w / 2} ${n.y - n.L}) rotate(${n.r} ${n.w / 2} ${n.L})">` +
+      `<rect x="${-n.w * .08}" y="${n.L * .52}" width="${n.w * 1.16}" height="${n.L * 3}" rx="${n.w * .58}" fill="${a.skin}"/>` +
+      `<path d="M${-n.w * .02} ${n.L * .8}C${-n.w * .02} ${n.L * 1.02} ${n.w * 1.02} ${n.L * 1.02} ${n.w * 1.02} ${n.L * .8}" stroke="#000" stroke-opacity=".12" stroke-width="3" fill="none"/>` +
+      `<clipPath id="${cid}"><path d="${shape}"/></clipPath><g clip-path="url(#${cid})">${paint(a, n.w, n.L, `${id}p${i}`, rnd)}</g>` +
+      `<path d="${shape}" fill="none" stroke="#000" stroke-opacity=".14"/>` +
+      `<path d="M${n.w * .25} ${n.L * .2}Q${n.w * .15} ${n.L * .5} ${n.w * .25} ${n.L * .74}" stroke="#fff" stroke-opacity=".42" stroke-width="${n.w * .075}" stroke-linecap="round" fill="none"/></g>`;
+  });
+  return `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${look.en}"><radialGradient id="${id}b" cx=".25" cy=".12" r="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
+    `<rect width="400" height="500" fill="${a.bg}"/><rect width="400" height="500" fill="url(#${id}b)"/>${nails}</svg>`;
+}
+const picture = (look, i) => look.photo ? `<img src="${look.photo}" alt="${look.en}" loading="lazy">` : drawSet(look, i);
+
+/* ============================================================
+   Page behaviour
+   ============================================================ */
+const T = (en, zh) => `<span class="en">${en}</span><span class="zh">${zh}</span>`;
+const $ = id => document.getElementById(id);
+
+// language
+const setLang = l => { document.body.className = "lang-" + l; document.documentElement.lang = l === "zh" ? "zh-CN" : "en"; $("lang").textContent = l === "zh" ? "EN" : "中文"; try { localStorage.setItem("nails-lang", l); } catch (e) {} };
+let savedLang = null; try { savedLang = localStorage.getItem("nails-lang"); } catch (e) {}
+setLang(location.hash === "#zh" ? "zh" : savedLang || "en");
+$("lang").onclick = () => setLang(document.body.classList.contains("lang-zh") ? "en" : "zh");
+
+// the wall: 5 columns, each holding the same run of sets three times so the drift loops without a seam
+const COLS = matchMedia("(max-width: 860px)").matches ? 4 : 7, PER = 4;   // fewer, bigger pictures on a phone
+$("plane").innerHTML = Array.from({ length: COLS }, (_, c) => {
+  const run = Array.from({ length: PER }, (_, r) => (c * PER + r * 3 + c) % LOOKS.length);
+  return `<div class="col">${[...run, ...run, ...run].map(i => `<div class="tile" data-i="${i}">${picture(LOOKS[i], i)}</div>`).join("")}</div>`;
+}).join("");
+
+// the cat-eye band follows the pointer across the hero
+const hero = $("hero"), plane = $("plane");
+let queued = false;
+hero.addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse" || queued) return;
+  queued = true;
+  requestAnimationFrame(() => { const box = hero.getBoundingClientRect(); plane.style.setProperty("--p", (6 + (e.clientX - box.left) / box.width * 88).toFixed(1) + "%"); queued = false; });
+});
+
+// looks grid and filter
+let filter = "all";
+const chips = [["all", "All", "全部"], ...Object.entries(STYLES).map(([k, s]) => [k, s.en, s.zh])];
+const drawGrid = () => {
+  $("chips").innerHTML = chips.map(([k, en, zh]) => `<button type="button" data-f="${k}" aria-pressed="${k === filter}">${T(en, zh)}</button>`).join("");
+  $("grid").innerHTML = LOOKS.map((l, i) => filter === "all" || l.style === filter
+    ? `<button class="look" type="button" data-i="${i}"><div class="art">${picture(l, i)}</div><b>${T(l.en, l.zh)}</b><small>${T(STYLES[l.style].en, STYLES[l.style].zh)}</small></button>` : "").join("");
+};
+drawGrid();
+$("chips").onclick = e => { const b = e.target.closest("button"); if (b) { filter = b.dataset.f; drawGrid(); } };
+
+// price list
+$("menu").innerHTML = Object.values(SERVICES).map(s => `<div><dt>${T(s.en, s.zh)}<small>${T(s.noteEn, s.noteZh)}</small></dt><i></i><dd><small>${T("from", "起")}</small>$${s.from}</dd></div>`).join("");
+
+// one set, opened
+const sheet = $("sheet");
+let open = null;
+const show = i => {
+  const l = LOOKS[i], s = SERVICES[l.service], shape = l.shape[0].toUpperCase() + l.shape.slice(1);
+  open = l;
+  $("sheet-art").innerHTML = picture(l, i);
+  $("sheet-name").innerHTML = T(l.en, l.zh);
+  $("sheet-kind").innerHTML = T(STYLES[l.style].en, STYLES[l.style].zh);
+  $("sheet-facts").innerHTML = [[T("Service", "项目"), T(s.en, s.zh)], [T("Shape", "甲型"), shape], [T("Time", "时间"), T(s.timeEn, s.timeZh)], [T("Price", "价格"), T(`from $${s.from}`, `$${s.from} 起`)]]
+    .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+  sheet.showModal();
+};
+document.addEventListener("click", e => { const hit = e.target.closest("[data-i]"); if (hit) show(+hit.dataset.i); });
+$("shut").onclick = () => sheet.close();
+sheet.addEventListener("click", e => { if (e.target === sheet) sheet.close(); });   // click on the backdrop
+$("sheet-book").onclick = () => {
+  if (open) { $("picked").innerHTML = T(`You picked <b>${open.en}</b>. Mention it when you book.`, `你选了 <b>${open.zh}</b>。预约时说一声就行。`); $("picked").classList.add("on"); }
+  sheet.close();
+};
+
+// phone: show the bottom Book bar only between the hero's button and the booking section
+if ("IntersectionObserver" in window) {
+  const seen = new Set();
+  const watch = new IntersectionObserver(entries => {
+    entries.forEach(en => en.isIntersecting ? seen.add(en.target) : seen.delete(en.target));
+    document.body.classList.toggle("scrolled", seen.size === 0);
+  });
+  watch.observe(document.querySelector(".go")); watch.observe($("book"));
+}
+
+// a link can open one set directly: index.html?look=3
+const asked = new URLSearchParams(location.search).get("look");
+if (asked !== null && LOOKS[+asked]) show(+asked);
+
+// links
+if (SITE.bookUrl) $("booklink").href = SITE.bookUrl;
+else $("booklink").onclick = e => { e.preventDefault(); $("picked").innerHTML = T("This is a test page, so there is no booking link yet.", "这是测试页面，还没有预约链接。"); $("picked").classList.add("on"); };
+if (SITE.instagram) { $("iglink").href = "https://instagram.com/" + SITE.instagram; $("iglink").textContent = "@" + SITE.instagram; $("igline").hidden = false; }
+
+// colour switch in the footer (for comparing palettes while this is a test)
+const pressSwatch = () => { const now = document.documentElement.dataset.palette || "";
+  document.querySelectorAll("#swatches button").forEach(b => b.setAttribute("aria-pressed", b.dataset.pal === now));
+  document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.documentElement).getPropertyValue("--page").trim(); };
+$("swatches").onclick = e => { const b = e.target.closest("button"); if (!b) return;
+  document.documentElement.dataset.palette = b.dataset.pal; try { localStorage.setItem("nails-palette", b.dataset.pal); } catch (err) {} pressSwatch(); };
+pressSwatch();
+</script>
+</body>
+</html>

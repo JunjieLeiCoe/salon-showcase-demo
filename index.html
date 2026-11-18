@@ -103,16 +103,36 @@
   body.lang-zh h2 { font-weight: 600; letter-spacing: 0; }
   .lede { margin-top: 12px; color: var(--quiet); max-width: 34em; }
 
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 22px; }
-  .chips button { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 15px; color: var(--quiet); cursor: pointer; }
-  .chips button:hover { color: var(--ink); border-color: var(--quiet); }
-  .chips button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--page); font-weight: 600; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px 16px; }
+  /* the lookbook: each edit is one row of large pictures that slides sideways; few on screen at once, lots of room */
+  .edit { margin-top: clamp(40px, 5vw, 64px); }
+  .edit-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; }
+  .edit-head h3 { margin: 0; font-size: 26px; font-weight: 650; line-height: 1.1; font-variation-settings: "wdth" 84; }
+  .edit-head > span { color: var(--quiet); font-size: 14.5px; }
+  .nudge { margin-left: auto; display: flex; gap: 8px; }
+  .nudge button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: none; color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
+  .nudge button:hover { border-color: var(--quiet); }
+  .nudge[hidden] { display: none; }
+  .rail { display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--pad) * -1); padding: 4px var(--pad); scroll-padding-inline: var(--pad); }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail .look { flex: none; width: 300px; scroll-snap-align: start; }
+  .edit.lead .rail .look { width: 400px; }
   .look { background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
-  .look .art { aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; filter: var(--grade); transition: transform .2s ease, filter .2s ease; }
-  .look:hover .art, .look:focus-visible .art { transform: translateY(-4px); filter: none; }
-  .look b { display: block; margin-top: 10px; font-weight: 600; font-size: 16px; }
+  .look .art { aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; filter: var(--grade); transition: filter .25s ease; }
+  .look:hover .art, .look:focus-visible .art { filter: none; }
+  .no { display: block; margin: 12px 0 0; font-size: 13px; color: var(--quiet); font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  .look b { display: block; margin-top: 1px; font-weight: 600; font-size: 17px; }
+  .edit.lead .look b { font-size: 20px; }
   .look small { color: var(--quiet); font-size: 14px; }
+  /* everything at once, small, with only the numbers: a contact sheet */
+  .index { margin-top: clamp(44px, 6vw, 72px); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .index summary { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; cursor: pointer; font-size: 19px; font-weight: 600; list-style: none; }
+  .index summary::-webkit-details-marker { display: none; }
+  .index summary::after { content: "+"; font-size: 24px; font-weight: 400; color: var(--quiet); }
+  .index[open] summary::after { content: "–"; }
+  .contact { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; padding-bottom: 22px; }
+  .thumb { position: relative; aspect-ratio: 4 / 5; padding: 0; border: 0; border-radius: 10px; overflow: hidden; background: none; cursor: pointer; filter: var(--grade); }
+  .thumb svg, .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .thumb i { position: absolute; left: 7px; bottom: 5px; font-style: normal; font-size: 12.5px; font-weight: 650; color: #fff; text-shadow: 0 1px 4px rgba(0, 0, 0, .7); font-variant-numeric: tabular-nums; }
 
   .two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 6vw, 96px); align-items: start; }
   .menu { margin: 0; }
@@ -145,7 +165,12 @@
   dialog { width: min(880px, calc(100vw - 28px)); padding: 0; border: 1px solid var(--line); border-radius: 22px; background: var(--raised); color: var(--ink); overflow: hidden; }
   dialog::backdrop { background: rgba(8, 10, 9, .74); backdrop-filter: blur(3px); }
   .sheet { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .big { aspect-ratio: 4 / 5; }
+  .big { position: relative; aspect-ratio: 4 / 5; }
+  .big > #sheet-art { height: 100%; }
+  /* a round close-up in the corner, like looking through a loupe */
+  .loupe { position: absolute; right: 16px; bottom: 16px; width: 116px; height: 116px; border-radius: 50%; overflow: hidden; border: 2px solid var(--ink); box-shadow: 0 10px 24px rgba(0, 0, 0, .45); }
+  .loupe[hidden] { display: none; }
+  .info .no { margin: 0 0 4px; }
   .info { padding: 34px 30px 30px; display: flex; flex-direction: column; }
   .info h3 { margin: 0; font-size: 34px; line-height: 1.05; font-weight: 750; letter-spacing: -.015em; font-variation-settings: "wdth" 80; }
   .info .kind { color: var(--quiet); margin-top: 8px; }
@@ -181,13 +206,13 @@
 
     .band { padding: 56px var(--pad); }
     .two { grid-template-columns: 1fr; gap: 22px; }
-    /* filters on one line that scrolls sideways, so the pictures start sooner */
-    .chips { flex-wrap: nowrap; overflow-x: auto; margin: 22px calc(var(--pad) * -1) 18px; padding: 2px var(--pad); scrollbar-width: none; }
-    .chips::-webkit-scrollbar { display: none; }
-    .chips button { flex: none; padding: 10px 17px; }
-    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; }
-    .look:active .art { transform: scale(.97); }
-    .look b { font-size: 15.5px; margin-top: 8px; } .look small { font-size: 13.5px; }
+    /* one big picture per swipe, with the edge of the next one showing so it is clear there is more */
+    .edit { margin-top: 38px; } .edit-head h3 { font-size: 23px; } .nudge { display: none; }
+    .rail { gap: 12px; }
+    .rail .look { width: 64vw; } .edit.lead .rail .look { width: 80vw; }
+    .look:active .art { filter: none; }
+    .contact { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .loupe { width: 92px; height: 92px; right: 12px; bottom: 12px; }
     .menu dt { font-size: 18.5px; } .menu dd { font-size: 19px; } .menu dt small { font-size: 14.5px; }
     .steps b { font-size: 18px; }
     .bookrow .btn { width: 100%; text-align: center; padding: 16px; font-size: 17px; }
@@ -243,9 +268,12 @@
 
   <section class="band" id="looks">
     <h2><span class="en">Looks</span><span class="zh">款式</span></h2>
-    <p class="lede"><span class="en">Tap a set to see what it is, how long it takes and where the price starts. These are drawn stand-ins until the real photos go in.</span><span class="zh">点一副看看是什么款、要多久、起步价多少。现在是手绘示意图，之后换成真实照片。</span></p>
-    <div class="chips" id="chips" role="group" aria-label="Filter looks by style"></div>
-    <div class="grid" id="grid"></div>
+    <p class="lede"><span class="en">Slide through each edit and tap a look for the details. Every look has a number, so you can just say “No. 7” when you book. These are drawn stand-ins until the real photos go in.</span><span class="zh">左右滑动看每个系列，点一款看细节。每一款都有编号，预约时说“7 号”就行。现在是手绘示意图，之后换成真实照片。</span></p>
+    <div id="lookbook"></div>
+    <details class="index">
+      <summary id="index-title"></summary>
+      <div class="contact" id="contact"></div>
+    </details>
   </section>
 
   <section class="band two" id="prices">
@@ -288,8 +316,9 @@
 <dialog id="sheet" aria-labelledby="sheet-name">
   <button class="shut" id="shut" type="button" aria-label="Close">×</button>
   <div class="sheet">
-    <div class="big" id="sheet-art"></div>
+    <div class="big"><div id="sheet-art"></div><div class="loupe" id="sheet-loupe" aria-hidden="true"></div></div>
     <div class="info">
+      <p class="no" id="sheet-no"></p>
       <h3 id="sheet-name"></h3>
       <p class="kind" id="sheet-kind"></p>
       <dl class="facts" id="sheet-facts"></dl>
@@ -326,16 +355,18 @@ const STYLES = {
   sparkle: { en: "Sparkle", zh: "闪片" },
 };
 
-// One entry per set. Add `photo: "photos/cherry-french.jpg"` to show a real photo instead of the drawing.
+// One entry per set; its place in this list is its number (No. 01, No. 02, ...), so add new ones at the end.
+// `signature: true` puts it in the first, larger row. Add `photo: "photos/cherry-french.jpg"` to show a real photo
+// instead of the drawing, and `detail: "photos/cherry-french-close.jpg"` for the round close-up when it is opened.
 const LOOKS = [
-  { en: "Cherry French", zh: "樱桃法式", style: "french", service: "gel", shape: "almond", art: { bg: "#f3d9d2", skin: "#e8b9a0", type: "french", base: "#f6d5c9", tip: "#8f1027" } },
-  { en: "Glazed milk", zh: "奶油镜面", style: "chrome", service: "gel", shape: "oval", art: { bg: "#dcd8ea", skin: "#c99a7c", type: "chrome", base: "#f4eef2", sheen: "#cfc6f5", base2: "#fbe3ea" } },
-  { en: "Emerald cat eye", zh: "祖母绿猫眼", style: "cateye", service: "gel", shape: "almond", art: { bg: "#17352e", skin: "#b98463", type: "cateye", base: "#0e3b30", tip: "#a8f0cf" } },
+  { en: "Cherry French", zh: "樱桃法式", signature: true, style: "french", service: "gel", shape: "almond", art: { bg: "#f3d9d2", skin: "#e8b9a0", type: "french", base: "#f6d5c9", tip: "#8f1027" } },
+  { en: "Glazed milk", zh: "奶油镜面", signature: true, style: "chrome", service: "gel", shape: "oval", art: { bg: "#dcd8ea", skin: "#c99a7c", type: "chrome", base: "#f4eef2", sheen: "#cfc6f5", base2: "#fbe3ea" } },
+  { en: "Emerald cat eye", zh: "祖母绿猫眼", signature: true, style: "cateye", service: "gel", shape: "almond", art: { bg: "#17352e", skin: "#b98463", type: "cateye", base: "#0e3b30", tip: "#a8f0cf" } },
   { en: "Blush aura", zh: "腮红晕染", style: "painted", service: "gel", shape: "oval", art: { bg: "#f6e3da", skin: "#eec4ac", type: "aura", base: "#fbe9df", tip: "#f0668a" } },
   { en: "Tortoiseshell", zh: "玳瑁", style: "painted", service: "ext", shape: "coffin", art: { bg: "#e9c98f", skin: "#8d5a3d", type: "tortoise", base: "#d98a1e", tip: "#3a1a08" } },
   { en: "Tiny hearts", zh: "小爱心", style: "painted", service: "gel", shape: "almond", art: { bg: "#ffd5dc", skin: "#e8b9a0", type: "hearts", base: "#ffe9ec", tip: "#d81e3f" } },
-  { en: "Blue porcelain", zh: "青花瓷", style: "painted", service: "ext", shape: "square", art: { bg: "#c9d8ee", skin: "#eec4ac", type: "porcelain", base: "#fbfbf7", tip: "#1d47b0" } },
-  { en: "Gold leaf noir", zh: "黑金箔", style: "sparkle", service: "ext", shape: "stiletto", art: { bg: "#2b2620", skin: "#b98463", type: "foil", base: "#15130f", tip: "#e9c46a" } },
+  { en: "Blue porcelain", zh: "青花瓷", signature: true, style: "painted", service: "ext", shape: "square", art: { bg: "#c9d8ee", skin: "#eec4ac", type: "porcelain", base: "#fbfbf7", tip: "#1d47b0" } },
+  { en: "Gold leaf noir", zh: "黑金箔", signature: true, style: "sparkle", service: "ext", shape: "stiletto", art: { bg: "#2b2620", skin: "#b98463", type: "foil", base: "#15130f", tip: "#e9c46a" } },
   { en: "Lavender fade", zh: "薰衣草渐变", style: "painted", service: "gel", shape: "oval", art: { bg: "#e4d7f5", skin: "#c99a7c", type: "ombre", base: "#fbeef2", tip: "#8b5fd6" } },
   { en: "Mocha check", zh: "摩卡格纹", style: "painted", service: "gel", shape: "square", art: { bg: "#d8c1ae", skin: "#8d5a3d", type: "checker", base: "#f4e6d6", tip: "#6b3f2a" } },
   { en: "Midnight stars", zh: "午夜星空", style: "sparkle", service: "ext", shape: "almond", art: { bg: "#101a3d", skin: "#eec4ac", type: "stars", base: "#16245c", tip: "#ffe9a8" } },
@@ -431,7 +462,7 @@ function paint(a, w, L, id, rnd) {
   }
 }
 
-function drawSet(look, seed) {
+function drawSet(look, seed, box = "0 0 400 500") {
   const a = look.art, id = "n" + (serial++), rnd = mulberry(seed * 977 + 13);
   let nails = "";
   FAN.forEach((n, i) => {
@@ -443,7 +474,7 @@ function drawSet(look, seed) {
       `<path d="${shape}" fill="none" stroke="#000" stroke-opacity=".14"/>` +
       `<path d="M${n.w * .25} ${n.L * .2}Q${n.w * .15} ${n.L * .5} ${n.w * .25} ${n.L * .74}" stroke="#fff" stroke-opacity=".42" stroke-width="${n.w * .075}" stroke-linecap="round" fill="none"/></g>`;
   });
-  return `<svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${look.en}"><radialGradient id="${id}b" cx=".25" cy=".12" r="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
+  return `<svg viewBox="${box}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${look.en}"><radialGradient id="${id}b" cx=".25" cy=".12" r="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/></radialGradient>` +
     `<rect width="400" height="500" fill="${a.bg}"/><rect width="400" height="500" fill="url(#${id}b)"/>${nails}</svg>`;
 }
 const picture = (look, i) => look.photo ? `<img src="${look.photo}" alt="${look.en}" loading="lazy">` : drawSet(look, i);
@@ -502,16 +533,27 @@ showStats(SITE.stats, null);
   document.addEventListener("visibilitychange", again);
 })();
 
-// looks grid and filter
-let filter = "all";
-const chips = [["all", "All", "全部"], ...Object.entries(STYLES).map(([k, s]) => [k, s.en, s.zh])];
-const drawGrid = () => {
-  $("chips").innerHTML = chips.map(([k, en, zh]) => `<button type="button" data-f="${k}" aria-pressed="${k === filter}">${T(en, zh)}</button>`).join("");
-  $("grid").innerHTML = LOOKS.map((l, i) => filter === "all" || l.style === filter
-    ? `<button class="look" type="button" data-i="${i}"><div class="art">${picture(l, i)}</div><b>${T(l.en, l.zh)}</b><small>${T(STYLES[l.style].en, STYLES[l.style].zh)}</small></button>` : "").join("");
-};
-drawGrid();
-$("chips").onclick = e => { const b = e.target.closest("button"); if (b) { filter = b.dataset.f; drawGrid(); } };
+// the lookbook: a few edits, each a row of big pictures to swipe through, then a contact sheet of everything.
+// Every look has a number, so a client can say "No. 7" when she books.
+const no = i => "No. " + String(i + 1).padStart(2, "0");
+const SHAPE_ZH = { almond: "杏仁形", oval: "椭圆形", square: "方形", coffin: "芭蕾形", stiletto: "尖形" };
+const shapeName = l => T(l.shape[0].toUpperCase() + l.shape.slice(1), SHAPE_ZH[l.shape] || l.shape);
+const card = i => { const l = LOOKS[i], s = SERVICES[l.service];
+  return `<button class="look" type="button" data-i="${i}"><div class="art">${picture(l, i)}</div><span class="no">${no(i)}</span><b>${T(l.en, l.zh)}</b><small>${shapeName(l)}${T(", from $" + s.from, "，$" + s.from + " 起")}</small></button>`; };
+const every = LOOKS.map((_, i) => i);
+const edits = [{ lead: true, en: "Signature looks", zh: "招牌款", items: every.filter(i => LOOKS[i].signature) },
+               ...Object.entries(STYLES).map(([k, s]) => ({ en: s.en, zh: s.zh, items: every.filter(i => LOOKS[i].style === k) }))].filter(e => e.items.length);
+$("lookbook").innerHTML = edits.map(e =>
+  `<div class="edit${e.lead ? " lead" : ""}"><div class="edit-head"><h3>${T(e.en, e.zh)}</h3><span>${T(e.items.length + " looks", e.items.length + " 款")}</span>` +
+  `<div class="nudge"><button type="button" data-go="-1" aria-label="Previous looks">‹</button><button type="button" data-go="1" aria-label="More looks">›</button></div></div>` +
+  `<div class="rail" tabindex="0" role="group" aria-label="${e.en}">${e.items.map(card).join("")}</div></div>`).join("");
+$("lookbook").addEventListener("click", e => { const b = e.target.closest("[data-go]"); if (!b) return;
+  const rail = b.closest(".edit").querySelector(".rail"); rail.scrollBy({ left: +b.dataset.go * rail.clientWidth * .8, behavior: "smooth" }); });
+// the arrows only show on rows that have more looks than fit
+const fitNudges = () => document.querySelectorAll(".edit").forEach(ed => { const rail = ed.querySelector(".rail"); ed.querySelector(".nudge").hidden = rail.scrollWidth <= rail.clientWidth + 4; });
+fitNudges(); addEventListener("resize", fitNudges);
+$("index-title").innerHTML = T(`All ${LOOKS.length} looks`, `全部 ${LOOKS.length} 款`);
+$("contact").innerHTML = every.map(i => `<button class="thumb" type="button" data-i="${i}" aria-label="${no(i)} ${LOOKS[i].en}">${picture(LOOKS[i], i)}<i>${String(i + 1).padStart(2, "0")}</i></button>`).join("");
 
 // price list
 $("menu").innerHTML = Object.values(SERVICES).map(s => `<div><dt>${T(s.en, s.zh)}<small>${T(s.noteEn, s.noteZh)}</small></dt><i></i><dd><small>${T("from", "起")}</small>$${s.from}</dd></div>`).join("");
@@ -520,12 +562,16 @@ $("menu").innerHTML = Object.values(SERVICES).map(s => `<div><dt>${T(s.en, s.zh)
 const sheet = $("sheet");
 let open = null;
 const show = i => {
-  const l = LOOKS[i], s = SERVICES[l.service], shape = l.shape[0].toUpperCase() + l.shape.slice(1);
-  open = l;
+  const l = LOOKS[i], s = SERVICES[l.service];
+  open = { ...l, no: no(i) };
   $("sheet-art").innerHTML = picture(l, i);
+  // the close-up: a second photo if there is one, otherwise the drawing zoomed in on the middle nail
+  const close = l.photo ? (l.detail ? `<img src="${l.detail}" alt="">` : "") : drawSet(l, i, "140 158 120 120");
+  $("sheet-loupe").innerHTML = close; $("sheet-loupe").hidden = !close;
+  $("sheet-no").textContent = no(i);
   $("sheet-name").innerHTML = T(l.en, l.zh);
   $("sheet-kind").innerHTML = T(STYLES[l.style].en, STYLES[l.style].zh);
-  $("sheet-facts").innerHTML = [[T("Service", "项目"), T(s.en, s.zh)], [T("Shape", "甲型"), shape], [T("Time", "时间"), T(s.timeEn, s.timeZh)], [T("Price", "价格"), T(`from $${s.from}`, `$${s.from} 起`)]]
+  $("sheet-facts").innerHTML = [[T("Service", "项目"), T(s.en, s.zh)], [T("Shape", "甲型"), shapeName(l)], [T("Time", "时间"), T(s.timeEn, s.timeZh)], [T("Price", "价格"), T(`from $${s.from}`, `$${s.from} 起`)]]
     .map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
   sheet.showModal();
 };
@@ -533,7 +579,7 @@ document.addEventListener("click", e => { const hit = e.target.closest("[data-i]
 $("shut").onclick = () => sheet.close();
 sheet.addEventListener("click", e => { if (e.target === sheet) sheet.close(); });   // click on the backdrop
 $("sheet-book").onclick = () => {
-  if (open) { $("picked").innerHTML = T(`You picked <b>${open.en}</b>. Mention it when you book.`, `你选了 <b>${open.zh}</b>。预约时说一声就行。`); $("picked").classList.add("on"); }
+  if (open) { $("picked").innerHTML = T(`You picked <b>${open.no} ${open.en}</b>. Mention the number when you book.`, `你选了 <b>${open.no} ${open.zh}</b>。预约时说编号就行。`); $("picked").classList.add("on"); }
   sheet.close();
 };
 

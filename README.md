@@ -7,7 +7,11 @@ It is a demo. The studio name, the numbers, the prices and the pictures are plac
 ## What is on the page
 
 1. **Hero.** Headline, one Book button, two counters (sets painted, clients) whose digits roll up to the exact figures, and a wall of nail sets that fills the screen and drifts slowly. The sets carry on behind the text, dimmed. Tap any set to open it.
-2. **Looks.** The same sets as a grid with style filters.
+2. **Looks**, laid out as a lookbook:
+   - A few edits (signature looks first, then one per style). Each is a single row of large pictures that slides sideways, so only one or two looks are on screen at a time.
+   - Every look has a number (No. 01, No. 02, ...), so a client can name the one she wants when she books.
+   - A look opens with its details and a round close-up of the nails in the corner.
+   - "All looks" at the end unfolds a contact sheet: every look small, with just its number.
 3. **Prices.** Three services with starting prices.
 4. **How to book.** Three steps and the booking button.
 
@@ -19,7 +23,7 @@ Most visitors will arrive on a phone, so that layout gets the attention:
 
 - The wall fills the first screen, with the words over its dimmed upper part and the bright sets below.
 - A set opens as a sheet from the bottom of the screen, where the thumb is.
-- The style filters sit on one line that scrolls sideways.
+- Each row of looks shows one big picture and the edge of the next, so it is clear there is more to swipe to.
 - A Book bar appears at the bottom once the first Book button has scrolled away.
 - Fewer, bigger pictures on the wall, and lighter effects than on desktop.
 - Motion stops for visitors who have reduced motion turned on.
@@ -40,10 +44,10 @@ All content is in the block at the top of the `<script>` in `index.html`, marked
 
 - `SITE`: booking link and Instagram handle. While they are empty, the Book button says the page is a demo and the Instagram line is hidden.
 - `SERVICES`: the price list.
-- `STYLES`: the filter names.
-- `LOOKS`: one entry per set (name in both languages, style, service, nail shape).
+- `STYLES`: the edits, one row each.
+- `LOOKS`: one entry per set (name in both languages, style, service, nail shape). Its place in the list is its number, so add new looks at the end. `signature: true` puts a look in the first, larger row.
 
-**Real photos:** put them in a `photos/` folder and add `photo: "photos/cherry-french.jpg"` to the look's entry. The photo then replaces the drawing everywhere. Crop them all to 4:5 (portrait) with similar lighting. Keep each under about 300 KB.
+**Real photos:** put them in a `photos/` folder and add `photo: "photos/cherry-french.jpg"` to the look's entry. The photo then replaces the drawing everywhere. Add `detail: "photos/cherry-french-close.jpg"` for the round close-up shown when the look is opened. Crop the main photos to 4:5 (portrait) with similar lighting and the close-ups square. Keep each under about 300 KB.
 
 ## Design choices
 

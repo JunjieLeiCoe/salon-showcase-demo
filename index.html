@@ -123,16 +123,12 @@
   .look b { display: block; margin-top: 1px; font-weight: 600; font-size: 17px; }
   .edit.lead .look b { font-size: 20px; }
   .look small { color: var(--quiet); font-size: 14px; }
-  /* everything at once, small, with only the numbers: a contact sheet */
-  .index { margin-top: clamp(44px, 6vw, 72px); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .index summary { display: flex; justify-content: space-between; align-items: center; padding: 18px 0; cursor: pointer; font-size: 19px; font-weight: 600; list-style: none; }
-  .index summary::-webkit-details-marker { display: none; }
-  .index summary::after { content: "+"; font-size: 24px; font-weight: 400; color: var(--quiet); }
-  .index[open] summary::after { content: "–"; }
-  .contact { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; padding-bottom: 22px; }
-  .thumb { position: relative; aspect-ratio: 4 / 5; padding: 0; border: 0; border-radius: 10px; overflow: hidden; background: none; cursor: pointer; filter: var(--grade); }
-  .thumb svg, .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  .thumb i { position: absolute; left: 7px; bottom: 5px; font-style: normal; font-size: 12.5px; font-weight: 650; color: #fff; text-shadow: 0 1px 4px rgba(0, 0, 0, .7); font-variant-numeric: tabular-nums; }
+  /* every look, in a grid, with one tab per style */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+  .chips button { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 15px; color: var(--quiet); cursor: pointer; }
+  .chips button:hover { color: var(--ink); border-color: var(--quiet); }
+  .chips button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--page); font-weight: 600; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 26px 18px; }
 
   .two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 6vw, 96px); align-items: start; }
   .menu { margin: 0; }
@@ -211,7 +207,12 @@
     .rail { gap: 12px; }
     .rail .look { width: 64vw; } .edit.lead .rail .look { width: 80vw; }
     .look:active .art { filter: none; }
-    .contact { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    /* the tabs sit on one line that scrolls sideways; the grid is two across */
+    .chips { flex-wrap: nowrap; overflow-x: auto; margin: 0 calc(var(--pad) * -1) 18px; padding: 2px var(--pad); scrollbar-width: none; }
+    .chips::-webkit-scrollbar { display: none; }
+    .chips button { flex: none; padding: 10px 17px; }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; }
+    .grid .look b { font-size: 15.5px; } .grid .look small { font-size: 13.5px; }
     .loupe { width: 92px; height: 92px; right: 12px; bottom: 12px; }
     .menu dt { font-size: 18.5px; } .menu dd { font-size: 19px; } .menu dt small { font-size: 14.5px; }
     .steps b { font-size: 18px; }
@@ -268,12 +269,13 @@
 
   <section class="band" id="looks">
     <h2><span class="en">Looks</span><span class="zh">款式</span></h2>
-    <p class="lede"><span class="en">Slide through each edit and tap a look for the details. Every look has a number, so you can just say “No. 7” when you book. These are drawn stand-ins until the real photos go in.</span><span class="zh">左右滑动看每个系列，点一款看细节。每一款都有编号，预约时说“7 号”就行。现在是手绘示意图，之后换成真实照片。</span></p>
+    <p class="lede"><span class="en">Swipe through the signature looks, or pick a style below. Tap a look for the details. Every look has a number, so you can just say “No. 7” when you book. These are drawn stand-ins until the real photos go in.</span><span class="zh">左右滑动看招牌款，或者在下面按风格挑。点一款看细节。每一款都有编号，预约时说“7 号”就行。现在是手绘示意图，之后换成真实照片。</span></p>
     <div id="lookbook"></div>
-    <details class="index">
-      <summary id="index-title"></summary>
-      <div class="contact" id="contact"></div>
-    </details>
+    <div class="edit">
+      <div class="edit-head"><h3><span class="en">All looks</span><span class="zh">全部款式</span></h3><span id="grid-count"></span></div>
+      <div class="chips" id="chips" role="group" aria-label="Show looks by style"></div>
+      <div class="grid" id="grid"></div>
+    </div>
   </section>
 
   <section class="band two" id="prices">
@@ -533,7 +535,7 @@ showStats(SITE.stats, null);
   document.addEventListener("visibilitychange", again);
 })();
 
-// the lookbook: a few edits, each a row of big pictures to swipe through, then a contact sheet of everything.
+// the looks: the signature ones first, as a row of big pictures to swipe through; then every look in a grid with style tabs.
 // Every look has a number, so a client can say "No. 7" when she books.
 const no = i => "No. " + String(i + 1).padStart(2, "0");
 const SHAPE_ZH = { almond: "杏仁形", oval: "椭圆形", square: "方形", coffin: "芭蕾形", stiletto: "尖形" };
@@ -541,8 +543,7 @@ const shapeName = l => T(l.shape[0].toUpperCase() + l.shape.slice(1), SHAPE_ZH[l
 const card = i => { const l = LOOKS[i], s = SERVICES[l.service];
   return `<button class="look" type="button" data-i="${i}"><div class="art">${picture(l, i)}</div><span class="no">${no(i)}</span><b>${T(l.en, l.zh)}</b><small>${shapeName(l)}${T(", from $" + s.from, "，$" + s.from + " 起")}</small></button>`; };
 const every = LOOKS.map((_, i) => i);
-const edits = [{ lead: true, en: "Signature looks", zh: "招牌款", items: every.filter(i => LOOKS[i].signature) },
-               ...Object.entries(STYLES).map(([k, s]) => ({ en: s.en, zh: s.zh, items: every.filter(i => LOOKS[i].style === k) }))].filter(e => e.items.length);
+const edits = [{ lead: true, en: "Signature looks", zh: "招牌款", items: every.filter(i => LOOKS[i].signature) }].filter(e => e.items.length);
 $("lookbook").innerHTML = edits.map(e =>
   `<div class="edit${e.lead ? " lead" : ""}"><div class="edit-head"><h3>${T(e.en, e.zh)}</h3><span>${T(e.items.length + " looks", e.items.length + " 款")}</span>` +
   `<div class="nudge"><button type="button" data-go="-1" aria-label="Previous looks">‹</button><button type="button" data-go="1" aria-label="More looks">›</button></div></div>` +
@@ -550,10 +551,20 @@ $("lookbook").innerHTML = edits.map(e =>
 $("lookbook").addEventListener("click", e => { const b = e.target.closest("[data-go]"); if (!b) return;
   const rail = b.closest(".edit").querySelector(".rail"); rail.scrollBy({ left: +b.dataset.go * rail.clientWidth * .8, behavior: "smooth" }); });
 // the arrows only show on rows that have more looks than fit
-const fitNudges = () => document.querySelectorAll(".edit").forEach(ed => { const rail = ed.querySelector(".rail"); ed.querySelector(".nudge").hidden = rail.scrollWidth <= rail.clientWidth + 4; });
+const fitNudges = () => document.querySelectorAll("#lookbook .edit").forEach(ed => { const rail = ed.querySelector(".rail"); ed.querySelector(".nudge").hidden = rail.scrollWidth <= rail.clientWidth + 4; });
 fitNudges(); addEventListener("resize", fitNudges);
-$("index-title").innerHTML = T(`All ${LOOKS.length} looks`, `全部 ${LOOKS.length} 款`);
-$("contact").innerHTML = every.map(i => `<button class="thumb" type="button" data-i="${i}" aria-label="${no(i)} ${LOOKS[i].en}">${picture(LOOKS[i], i)}<i>${String(i + 1).padStart(2, "0")}</i></button>`).join("");
+
+// every look in a grid, with one tab per style
+let tab = "all";
+const tabs = [["all", "All", "全部"], ...Object.entries(STYLES).map(([k, s]) => [k, s.en, s.zh])];
+const drawGrid = () => {
+  const shown = every.filter(i => tab === "all" || LOOKS[i].style === tab);
+  $("chips").innerHTML = tabs.map(([k, en, zh]) => `<button type="button" data-f="${k}" aria-pressed="${k === tab}">${T(en, zh)}</button>`).join("");
+  $("grid").innerHTML = shown.map(card).join("");
+  $("grid-count").innerHTML = T(shown.length + " looks", shown.length + " 款");
+};
+drawGrid();
+$("chips").onclick = e => { const b = e.target.closest("button"); if (b) { tab = b.dataset.f; drawGrid(); } };
 
 // price list
 $("menu").innerHTML = Object.values(SERVICES).map(s => `<div><dt>${T(s.en, s.zh)}<small>${T(s.noteEn, s.noteZh)}</small></dt><i></i><dd><small>${T("from", "起")}</small>$${s.from}</dd></div>`).join("");

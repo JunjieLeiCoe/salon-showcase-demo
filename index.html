@@ -174,8 +174,11 @@
   .facts div { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 16px; }
   .facts dt { color: var(--quiet); } .facts dd { margin: 0; font-weight: 600; text-align: right; }
   .info .btn { margin-top: auto; text-align: center; }
-  .shut { position: absolute; top: 12px; right: 12px; width: 38px; height: 38px; border-radius: 50%; border: 0; background: color-mix(in srgb, var(--page) 72%, transparent); color: var(--ink); font-size: 20px; line-height: 1; cursor: pointer; }
-  .shut:hover { background: var(--page); }
+  /* the round close button sits above the picture (z-index), top right, where a thumb expects it */
+  .shut { position: absolute; z-index: 3; top: 12px; right: 12px; width: 42px; height: 42px; padding: 0; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--ink) 55%, transparent);
+          background: color-mix(in srgb, var(--page) 86%, transparent); color: var(--ink); display: grid; place-items: center; cursor: pointer; box-shadow: 0 6px 16px rgba(0, 0, 0, .35); }
+  .shut svg { width: 16px; height: 16px; display: block; }
+  .shut:hover { background: var(--page); border-color: var(--ink); }
 
   .bookbar { display: none; }
 
@@ -223,7 +226,7 @@
     .sheet { grid-template-columns: 1fr; } .big { aspect-ratio: 4 / 3; }
     .info { padding: 20px var(--pad) calc(22px + env(safe-area-inset-bottom)); } .info h3 { font-size: 27px; } .facts { margin-top: 16px; }
     .info .btn { margin-top: 20px; padding: 16px; font-size: 17px; }
-    .shut { width: 44px; height: 44px; font-size: 22px; }
+    .shut { width: 46px; height: 46px; top: 14px; right: 14px; } .shut svg { width: 18px; height: 18px; }
 
     /* the bar appears once the hero's own button has scrolled away, and steps aside at the booking section */
     .bookbar { display: block; position: fixed; z-index: 9; left: 14px; right: 14px; bottom: calc(14px + env(safe-area-inset-bottom)); padding: 16px; font-size: 17px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); transform: translateY(160%); transition: transform .25s ease; }
@@ -316,7 +319,7 @@
 </footer>
 
 <dialog id="sheet" aria-labelledby="sheet-name">
-  <button class="shut" id="shut" type="button" aria-label="Close">×</button>
+  <button class="shut" id="shut" type="button" aria-label="Close"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 2.5l11 11M13.5 2.5l-11 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg></button>
   <div class="sheet">
     <div class="big"><div id="sheet-art"></div><div class="loupe" id="sheet-loupe" aria-hidden="true"></div></div>
     <div class="info">

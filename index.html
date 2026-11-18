@@ -71,8 +71,15 @@
   .say > p b { color: var(--ink); font-weight: 500; }
   .go { display: flex; align-items: center; gap: 24px; margin-top: 30px; flex-wrap: wrap; }
   .proof { display: flex; gap: clamp(22px, 4vw, 52px); margin-top: clamp(40px, 7vh, 76px); }
-  .proof b { display: block; font-size: 34px; font-weight: 700; line-height: 1.05; font-variation-settings: "wdth" 82; font-variant-numeric: tabular-nums; }
-  .proof span { font-size: 14.5px; color: var(--quiet); }
+  .proof > div { display: flex; flex-direction: column; }
+  .proof > div > span { font-size: 14.5px; color: var(--quiet); }
+  /* the two numbers are counters: each digit is a reel that rolls up to its figure */
+  .roll { display: flex; font-size: clamp(38px, 4.4vw, 54px); font-weight: 700; line-height: 1.1; font-variation-settings: "wdth" 82; font-variant-numeric: tabular-nums; }
+  .reel { display: block; height: 1.1em; overflow: hidden;
+          -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%); mask-image: linear-gradient(180deg, transparent 0, #000 14%, #000 86%, transparent 100%); }
+  .strip { display: block; transition: transform 2.2s cubic-bezier(.16, 1, .3, 1); will-change: transform; }
+  .strip span { display: block; height: 1.1em; text-align: center; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
   /* the wall: a tilted plane of sets drifting in columns */
   /* It fills the whole hero. The sets lean to the right and sit nearly upright, so the pictures stay readable. */
@@ -170,7 +177,7 @@
     body.lang-zh h1 { font-size: clamp(40px, 12vw, 58px); }
     .say > p { margin-top: 18px; font-size: 17.5px; }
     .go { margin-top: 22px; gap: 20px; } .go .btn { padding: 15px 28px; font-size: 17px; }
-    .proof { margin-top: 26px; gap: 22px; } .proof b { font-size: 26px; } .proof span { font-size: 13.5px; display: block; }
+    .proof { margin-top: 26px; gap: 30px; } .roll { font-size: 36px; } .proof > div > span { font-size: 14px; }
 
     .band { padding: 56px var(--pad); }
     .two { grid-template-columns: 1fr; gap: 22px; }
@@ -199,6 +206,7 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .col, .plane { animation: none !important; }
+    .strip { transition: none; }
     .tile, .look .art { transition: none; }
   }
 </style>
@@ -226,9 +234,8 @@
         <a class="plain" href="#looks"><span class="en">See all looks</span><span class="zh">看全部款式</span></a>
       </div>
       <div class="proof">
-        <div><b>2,900+</b><span class="en">sets painted</span><span class="zh">副美甲</span></div>
-        <div><b>875</b><span class="en">clients</span><span class="zh">位客人</span></div>
-        <div><b>62</b><span class="en">regulars with 10+ visits</span><span class="zh">位来过 10 次以上的熟客</span></div>
+        <div><b class="roll" id="n-sets"></b><span class="en">sets painted</span><span class="zh">副美甲</span></div>
+        <div><b class="roll" id="n-clients"></b><span class="en">clients</span><span class="zh">位客人</span></div>
       </div>
     </div>
     <div class="wall" aria-hidden="true"><div class="plane" id="plane"></div></div>
@@ -300,6 +307,8 @@
 const SITE = {
   bookUrl: "",      // the online booking link; while empty, the Book button says this is a demo
   instagram: "",    // handle without the @; while empty, the Instagram line stays hidden
+  statsUrl: "stats.json",                 // the live counts; the page re-reads this file while it is open
+  stats: { sets: 2905, clients: 875 },    // shown if stats.json cannot be read (for example when the file is opened straight from disk)
 };
 
 // What a set is, how long it takes, where the price starts. Shown in the price list and on each look.
@@ -457,6 +466,41 @@ $("plane").innerHTML = Array.from({ length: COLS }, (_, c) => {
   const run = Array.from({ length: PER }, (_, r) => (c * PER + r * 3 + c) % LOOKS.length);
   return `<div class="col">${[...run, ...run, ...run].map(i => `<div class="tile" data-i="${i}">${picture(LOOKS[i], i)}</div>`).join("")}</div>`;
 }).join("");
+
+// the counters: digits roll up from zero to the exact figure, and roll again if stats.json changes while the page is open
+const STRIP = Array.from({ length: 30 }, (_, i) => `<span>${i % 10}</span>`).join("");
+function roll(el, value, spin) {
+  const text = Math.round(value).toLocaleString("en-US"), chars = [...text];
+  if (+el.dataset.len !== chars.length) {          // build the reels, all resting on 0
+    el.innerHTML = chars.map(ch => /\d/.test(ch) ? `<span class="reel" aria-hidden="true"><span class="strip">${STRIP}</span></span>` : `<span aria-hidden="true">${ch}</span>`).join("") + '<span class="sr"></span>';
+    el.dataset.len = chars.length;
+    el.offsetWidth;                                 // let that paint before anything moves
+  }
+  if (spin === null) return;                        // only laying out the zeros
+  el.querySelector(".sr").textContent = text;
+  const strips = el.querySelectorAll(".strip");
+  chars.filter(ch => /\d/.test(ch)).forEach((digit, k) => {
+    if (spin) strips[k].dataset.turns = k === strips.length - 1 ? 2 : 1;     // the last digit takes an extra turn
+    strips[k].style.transitionDelay = spin ? k * 120 + "ms" : "0ms";
+    strips[k].style.transform = `translateY(${-1.1 * ((+strips[k].dataset.turns || 0) * 10 + +digit)}em)`;
+  });
+}
+let stats = null;
+const showStats = (s, spin) => { roll($("n-sets"), s.sets, spin); roll($("n-clients"), s.clients, spin); if (spin !== null) stats = s; };
+const readStats = async () => {
+  try { const reply = await fetch(SITE.statsUrl + "?t=" + Date.now(), { cache: "no-store" }); if (!reply.ok) return null;
+        const s = await reply.json(); return Number.isFinite(s.sets) && Number.isFinite(s.clients) ? s : null; } catch (e) { return null; }
+};
+showStats(SITE.stats, null);
+(async () => {
+  const first = (await readStats()) || SITE.stats;
+  const start = () => setTimeout(() => showStats(first, true), 300);
+  if ("IntersectionObserver" in window) { const seen = new IntersectionObserver(es => { if (es[0].isIntersecting) { seen.disconnect(); start(); } }, { threshold: .6 }); seen.observe(document.querySelector(".proof")); }
+  else start();
+  const again = async () => { if (document.hidden || !stats) return; const now = await readStats(); if (now && (now.sets !== stats.sets || now.clients !== stats.clients)) showStats(now, false); };
+  setInterval(again, 5 * 60 * 1000);
+  document.addEventListener("visibilitychange", again);
+})();
 
 // looks grid and filter
 let filter = "all";

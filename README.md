@@ -6,7 +6,7 @@ It is a demo. The studio name, the numbers, the prices and the pictures are plac
 
 ## What is on the page
 
-1. **Hero.** Headline, one Book button, three numbers, and a wall of nail sets that fills the screen and drifts slowly. The sets carry on behind the text, dimmed. Tap any set to open it.
+1. **Hero.** Headline, one Book button, two counters (sets painted, clients) whose digits roll up to the exact figures, and a wall of nail sets that fills the screen and drifts slowly. The sets carry on behind the text, dimmed. Tap any set to open it.
 2. **Looks.** The same sets as a grid with style filters.
 3. **Prices.** Three services with starting prices.
 4. **How to book.** Three steps and the booking button.
@@ -23,6 +23,16 @@ Most visitors will arrive on a phone, so that layout gets the attention:
 - A Book bar appears at the bottom once the first Book button has scrolled away.
 - Fewer, bigger pictures on the wall, and lighter effects than on desktop.
 - Motion stops for visitors who have reduced motion turned on.
+
+## The counters
+
+The two numbers come from `stats.json` next to the page:
+
+```json
+{"sets": 2905, "clients": 875, "as_of": "2026-11-18"}
+```
+
+When the page opens, each digit rolls up from zero to its figure. While the page stays open it re-reads the file every five minutes (and when the tab comes back into view) and rolls to the new figures if they changed. To change the numbers, edit `stats.json` and push. If the file cannot be read, for example when `index.html` is opened straight from disk, the page uses the fallback figures in `SITE.stats`.
 
 ## Changing the content
 

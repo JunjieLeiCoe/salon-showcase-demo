@@ -6,7 +6,7 @@ It is a demo. The studio name, the numbers, the prices and the pictures are plac
 
 ## What is on the page
 
-1. **Hero.** Headline, one Book button, three numbers, and a wall of nail sets that fills the screen and drifts slowly. The sets carry on behind the text, dimmed. A band of light crosses the wall and follows the mouse, like cat-eye polish under a magnet. Tap any set to open it.
+1. **Hero.** Headline, one Book button, three numbers, and a wall of nail sets that fills the screen and drifts slowly. The sets carry on behind the text, dimmed. Tap any set to open it.
 2. **Looks.** The same sets as a grid with style filters.
 3. **Prices.** Three services with starting prices.
 4. **How to book.** Three steps and the booking button.

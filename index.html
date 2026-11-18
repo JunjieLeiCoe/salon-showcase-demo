@@ -19,16 +19,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&display=swap" rel="stylesheet">
 <style>
-  /* A quiet, aged palette; the one loud thing is the wall of sets, lit like cat-eye polish under a magnet.
-     Default is ink green with aged ivory and antique brass. Add ?palette=mocha or ?palette=cherry to the address to compare. */
-  @property --p { syntax: "<percentage>"; inherits: true; initial-value: 42%; }
+  /* A quiet, aged palette; the one loud thing is the wall of sets.
+     Default is ink green with aged ivory and antique brass. The footer has a colour switch; ?palette=mocha in the address works too. */
   :root {
     --page: #1f3029;         /* ink green */
     --raised: #2a4035;       /* raised surfaces */
     --line: #3f5849;
     --ink: #efe5d0;          /* text: aged ivory */
     --quiet: #b3b59c;        /* quiet text: oat */
-    --gleam: #f6e7bf;        /* the cat-eye light */
+    --gleam: #f6e7bf;        /* keyboard focus ring */
     --price: #cda861;        /* prices: antique brass */
     --grade: saturate(.7) sepia(.2) contrast(.96);   /* the faded-film look on every picture until it is hovered or opened */
     --face: "Bricolage Grotesque", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
@@ -90,11 +89,6 @@
   .tile { display: block; width: 100%; aspect-ratio: 4 / 5; margin: 0 0 20px; border-radius: 18px; overflow: hidden; cursor: pointer; box-shadow: 0 22px 44px rgba(0, 0, 0, .42); filter: var(--grade); transition: transform .25s ease, filter .25s ease; }
   .tile:hover { transform: translateZ(46px) scale(1.03); filter: brightness(1.06); }   /* true colour comes back on hover */
   .tile svg, .tile img, .look svg, .look img, .big svg, .big img { display: block; width: 100%; height: 100%; object-fit: cover; }
-  /* the cat-eye band: a stripe of light across the whole wall that follows the pointer */
-  .plane::after { content: ""; position: absolute; inset: -12%; pointer-events: none; transform: translateZ(2px); mix-blend-mode: soft-light;
-                  background: linear-gradient(98deg, transparent calc(var(--p) - 11%), rgba(255, 243, 214, .95) var(--p), transparent calc(var(--p) + 11%)); }
-  @media (hover: none) { .plane { animation: sweep 9s ease-in-out infinite alternate; } }
-  @keyframes sweep { from { --p: 8%; } to { --p: 92%; } }
 
   /* --- sections --- */
   .band { padding: clamp(64px, 9vw, 120px) var(--pad); max-width: 1320px; margin: 0 auto; }
@@ -463,15 +457,6 @@ $("plane").innerHTML = Array.from({ length: COLS }, (_, c) => {
   const run = Array.from({ length: PER }, (_, r) => (c * PER + r * 3 + c) % LOOKS.length);
   return `<div class="col">${[...run, ...run, ...run].map(i => `<div class="tile" data-i="${i}">${picture(LOOKS[i], i)}</div>`).join("")}</div>`;
 }).join("");
-
-// the cat-eye band follows the pointer across the hero
-const hero = $("hero"), plane = $("plane");
-let queued = false;
-hero.addEventListener("pointermove", e => {
-  if (e.pointerType !== "mouse" || queued) return;
-  queued = true;
-  requestAnimationFrame(() => { const box = hero.getBoundingClientRect(); plane.style.setProperty("--p", (6 + (e.clientX - box.left) / box.width * 88).toFixed(1) + "%"); queued = false; });
-});
 
 // looks grid and filter
 let filter = "all";
